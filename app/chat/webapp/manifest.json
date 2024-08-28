@@ -1,7 +1,7 @@
 {
   "_version": "1.59.0",
   "sap.app": {
-    "id": "capgenairag.chat",
+    "id": "btpcapragai.chat",
     "type": "application",
     "i18n": {
       "bundleName": "chat.i18n.i18n",
@@ -126,6 +126,6 @@
   },
   "sap.cloud": {
     "public": true,
-    "service": "capgenairag.service"
+    "service": "btpcapragai.service"
   }
 }

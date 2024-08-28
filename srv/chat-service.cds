@@ -1,4 +1,4 @@
-using {capgenairag as db} from '../db/schema';
+using {btpcapragai as db} from '../db/schema';
 
 type RagResponse_AdditionalContents {
     score       : String;

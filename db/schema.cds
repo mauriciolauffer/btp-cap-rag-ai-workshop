@@ -1,4 +1,4 @@
-namespace capgenairag;
+namespace btpcapragai;
 
 using {
     cuid,

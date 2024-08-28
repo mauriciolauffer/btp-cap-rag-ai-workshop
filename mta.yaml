@@ -52,16 +52,16 @@ modules:
     build-parameters:
       build-result: app/
       requires:
-        - name: capgenairagchat
+        - name: btpcapragaichat
           artifacts:
             - chat.zip
           target-path: app/
-        - name: capgenairagembedding
+        - name: btpcapragaiembedding
           artifacts:
             - embedding.zip
           target-path: app/
 
-  - name: capgenairagchat
+  - name: btpcapragaichat
     type: html5
     path: app/chat
     build-parameters:
@@ -71,7 +71,7 @@ modules:
         - npm ci
         - npm run build
       supported-platforms: []
-  - name: capgenairagembedding
+  - name: btpcapragaiembedding
     type: html5
     path: app/embedding
     build-parameters:
@@ -108,16 +108,16 @@ modules:
               TokenServiceInstanceName: btp-cap-rag-ai-auth
               TokenServiceKeyName: btp-cap-rag-ai-auth-key
               URL: ~{srv-api/srv-url}
-              sap.cloud.service: capgenairag.service
+              sap.cloud.service: btpcapragai.service
             - Name: btp-cap-rag-ai-html5-repository
               ServiceInstanceName: btp-cap-rag-ai-html5-repo-host
               ServiceKeyName: btp-cap-rag-ai-html5-repo-host-key
-              sap.cloud.service: capgenairag.service
+              sap.cloud.service: btpcapragai.service
             - Name: btp-cap-rag-ai-auth
               Authentication: OAuth2UserTokenExchange
               ServiceInstanceName: btp-cap-rag-ai-auth
               ServiceKeyName: btp-cap-rag-ai-auth-key
-              sap.cloud.service: capgenairag.service
+              sap.cloud.service: btpcapragai.service
 
 resources:
   - name: btp-cap-rag-ai-db

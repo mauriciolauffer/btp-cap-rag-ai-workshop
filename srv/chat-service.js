@@ -1,6 +1,6 @@
 const cds = require("@sap/cds");
 
-const tableName = "CAPGENAIRAG_DOCUMENTCHUNK";
+const tableName = "btpcapragai_DOCUMENTCHUNK";
 const embeddingColumnName = "EMBEDDING";
 const contentColumn = "TEXT_CHUNK";
 const chatHistoryInMemory = [];
