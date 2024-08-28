@@ -1,0 +1,44 @@
+<mvc:View controllerName="chat.controller.App"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m">
+    <App id="app">
+        <Page id="page" floatingFooter="true" title="{i18n>title}" busy="{ui>/busy}" busyIndicatorDelay="0">
+            <headerContent>
+                <Button icon="sap-icon://delete" tooltip="{i18n>delete}" press=".onDeleteChat" binding="{/deleteChatSession(...)}" />
+            </headerContent>
+            <content>
+                <List
+                    showSeparators="Inner"
+                    items="{chat>/}">
+                    <items>
+                        <FeedListItem
+                            icon="{chat>icon}"
+                            info="{chat>role}"
+                            timestamp="{chat>timestamp}"
+                            text="{chat>content}"
+                            class="sapUiTinyMargin" />
+                    </items>
+                    <noData>
+                        <IllustratedMessage enableVerticalResponsiveness="true"
+                            illustrationType="sapIllus-SimpleEmptyList" />
+                    </noData>
+                </List>
+            </content>
+            <footer>
+                <OverflowToolbar height="auto" width="100%">
+                    <ToolbarSpacer />
+                    <FeedInput
+                        showIcon="false"
+                        placeholder="Type a message...."
+                        growing="true"
+                        post=".onSendMessage"
+                        enabled="{ui>/enabled}"
+                        class="sapUiSmallMarginTopBottom"
+                        binding="{/getAiResponse(...)}" />
+                    <ToolbarSpacer />
+                </OverflowToolbar>
+            </footer>
+        </Page>
+    </App>
+</mvc:View>

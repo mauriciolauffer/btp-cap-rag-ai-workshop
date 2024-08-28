@@ -1,0 +1,8 @@
+{
+  "scopes": [],
+  "attributes": [],
+  "role-templates": [],
+  "oauth2-configuration": {
+    "redirect-uris": ["http://localhost:5000/"]
+  }
+}

@@ -1,0 +1,166 @@
+_schema-version: 3.3.0
+ID: btp-cap-rag-ai
+version: 1.0.0
+description: "A simple CAP project."
+parameters:
+  enable-parallel-deployments: true
+  deploy_mode: html5-repo
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        - npm ci
+        - npx cds build --production
+modules:
+  - name: btp-cap-rag-ai-srv
+    type: nodejs
+    path: gen/srv
+    parameters:
+      buildpack: nodejs_buildpack
+      readiness-health-check-type: http
+      readiness-health-check-http-endpoint: /health
+    build-parameters:
+      builder: npm
+      ignore:
+        - .env
+        - node_modules/
+        - default-env.json
+    provides:
+      - name: srv-api # required by consumers of CAP services (e.g. approuter)
+        properties:
+          srv-url: ${default-url}
+    requires:
+      - name: btp-cap-rag-ai-db
+      - name: btp-cap-rag-ai-auth
+      - name: btp-cap-rag-ai-destination
+
+  - name: btp-cap-rag-ai-db-deployer
+    type: hdb
+    path: gen/db
+    parameters:
+      buildpack: nodejs_buildpack
+    requires:
+      - name: btp-cap-rag-ai-db
+
+  - name: btp-cap-rag-ai-app-deployer
+    type: com.sap.application.content
+    path: gen
+    requires:
+      - name: btp-cap-rag-ai-html5-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: app/
+      requires:
+        - name: capgenairagchat
+          artifacts:
+            - chat.zip
+          target-path: app/
+        - name: capgenairagembedding
+          artifacts:
+            - embedding.zip
+          target-path: app/
+
+  - name: capgenairagchat
+    type: html5
+    path: app/chat
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms: []
+  - name: capgenairagembedding
+    type: html5
+    path: app/embedding
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm ci
+        - npm run build
+      supported-platforms: []
+  - name: btp-cap-rag-ai-destinations
+    type: com.sap.application.content
+    requires:
+      - name: btp-cap-rag-ai-auth
+        parameters:
+          service-key:
+            name: btp-cap-rag-ai-auth-key
+      - name: btp-cap-rag-ai-html5-repo-host
+        parameters:
+          service-key:
+            name: btp-cap-rag-ai-html5-repo-host-key
+      - name: srv-api
+      - name: btp-cap-rag-ai-destination
+        parameters:
+          content-target: true
+    build-parameters:
+      no-source: true
+    parameters:
+      content:
+        instance:
+          existing_destinations_policy: update
+          destinations:
+            - Name: btp-cap-rag-ai-app-srv
+              Authentication: OAuth2UserTokenExchange
+              TokenServiceInstanceName: btp-cap-rag-ai-auth
+              TokenServiceKeyName: btp-cap-rag-ai-auth-key
+              URL: ~{srv-api/srv-url}
+              sap.cloud.service: capgenairag.service
+            - Name: btp-cap-rag-ai-html5-repository
+              ServiceInstanceName: btp-cap-rag-ai-html5-repo-host
+              ServiceKeyName: btp-cap-rag-ai-html5-repo-host-key
+              sap.cloud.service: capgenairag.service
+            - Name: btp-cap-rag-ai-auth
+              Authentication: OAuth2UserTokenExchange
+              ServiceInstanceName: btp-cap-rag-ai-auth
+              ServiceKeyName: btp-cap-rag-ai-auth-key
+              sap.cloud.service: capgenairag.service
+
+resources:
+  - name: btp-cap-rag-ai-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+  - name: btp-cap-rag-ai-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: xsuaa
+      service-plan: application
+      path: ./xs-security.json
+      config:
+        xsappname: btp-cap-rag-ai-auth
+        tenant-mode: dedicated
+  - name: btp-cap-rag-ai-destination
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: srv-api
+    parameters:
+      service: destination
+      service-plan: lite
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            existing_destinations_policy: update
+            destinations:
+              - Name: btp-cap-rag-ai-srv-api
+                URL: ~{srv-api/srv-url}
+                Authentication: OAuth2UserTokenExchange
+                Type: HTTP
+                ProxyType: Internet
+                HTML5.ForwardAuthToken: true
+                HTML5.DynamicDestination: true
+              - Authentication: NoAuthentication
+                Name: ui5
+                ProxyType: Internet
+                Type: HTTP
+                URL: https://ui5.sap.com
+  - name: btp-cap-rag-ai-html5-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-plan: app-host

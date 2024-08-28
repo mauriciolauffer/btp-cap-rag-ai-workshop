@@ -1,0 +1,53 @@
+<mvc:View controllerName="embedding.controller.App"
+    xmlns:html="http://www.w3.org/1999/xhtml"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns:upload="sap.m.upload"
+    xmlns="sap.m">
+    <App id="app">
+        <Page id="page" floatingFooter="true" title="{i18n>title}" busyIndicatorDelay="0">
+            <headerContent>
+                <Button icon="sap-icon://delete" tooltip="{i18n>delete}" press=".onDeleteEmbeddings" binding="{/deleteEmbeddings(...)}" />
+            </headerContent>
+            <content>
+                <upload:UploadSet
+                    id="uploadSet"
+                    instantUpload="false"
+                    maxFileNameLength="255"
+                    maxFileSize="200"
+                    fileTypes="pdf"
+                    mediaTypes="application/pdf"
+                    afterItemAdded=".onAfterItemAdded"
+                    uploadCompleted=".onUploadCompleted"
+                    mode="None"
+                    items="{
+                    path:'/Files',
+                    parameters: { $orderby: 'createdAt desc' },
+                    templateShareable: false
+                    }">
+                    <upload:UploadSetItem
+                        id="uploadSetItems"
+                        fileName="{fileName}"
+                        mediaType="{mediaType}"
+                        enabledEdit="false"
+                        visibleEdit="false"
+                        enabledRemove="false"
+                        visibleRemove="true"
+                        removePressed=".onRemoveItem">
+                        <ObjectAttribute
+                            title="Uploaded By"
+                            text="{createdBy}"
+                            active="false" />
+                        <ObjectAttribute
+                            title="Uploaded on"
+                            text="{createdAt}"
+                            active="false" />
+                        <ObjectAttribute
+                            title="File Size"
+                            text="{size}"
+                            active="false" />
+                    </upload:UploadSetItem>
+                </upload:UploadSet>
+            </content>
+        </Page>
+    </App>
+</mvc:View>
