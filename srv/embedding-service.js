@@ -1,4 +1,6 @@
+const { setTimeout } = require("node:timers/promises");
 const { writeFile, unlink } = require("node:fs/promises");
+const path = require('node:path');
 const cds = require("@sap/cds");
 const { PDFDocument } = require("pdf-lib");
 const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
@@ -49,6 +51,7 @@ async function preparePdf(tempDocLocation, stream) {
   // Save the PDF document to a new file
   const pdfData = await pdfDoc.save();
   await writeFile(tempDocLocation, pdfData);
+  await setTimeout(200);
 }
 
 async function embeddingDocument(data, entities) {
@@ -60,11 +63,12 @@ async function embeddingDocument(data, entities) {
   if (result.length === 0) {
     throw new Error(`Document ${data.ID} not found!`);
   }
-  const tempDocLocation = __dirname + `/${result[0].fileName}`;
+  const localFileNameNoGaps = result[0].fileName.replace(/[^a-zA-Z0-9.]/g, '');
+  const tempDocLocation = path.join(__dirname, localFileNameNoGaps);
   try {
     await preparePdf(tempDocLocation, data.content);
 
-    // Delete existing embeddings
+    // Delete existing embeddings - This is just 
     await cds.delete(DocumentChunk);
 
     // Load the document to langchain text loader
@@ -92,7 +96,7 @@ async function embeddingDocument(data, entities) {
       const entry = {
         text_chunk: chunk.pageContent,
         metadata_column: result[0].fileName,
-        embedding: array2VectorBuffer(embedding.data[0].embedding),
+        embedding: array2VectorBuffer(embedding?.data[0]?.embedding),
       };
       textChunkEntries.push(entry);
     }
