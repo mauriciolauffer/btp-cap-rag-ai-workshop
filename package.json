@@ -25,6 +25,9 @@
     "eslint": "^9.9.0",
     "prettier": "^3.3.3"
   },
+  "peerDependencies": {
+    "@sap/cds-dk": "^8"
+  },
   "scripts": {
     "start": "cds-serve",
     "hybrid": "cds watch --profile hybrid",
