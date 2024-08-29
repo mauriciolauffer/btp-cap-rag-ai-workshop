@@ -66,9 +66,6 @@ async function embeddingDocument(data, entities) {
   try {
     await preparePdf(tempDocLocation, data.content);
 
-    // Delete existing embeddings - This is just 
-    await cds.delete(DocumentChunk);
-
     // Load the document to langchain text loader
     const loader = new PDFLoader(tempDocLocation);
     const document = await loader.load();
