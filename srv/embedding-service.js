@@ -1,4 +1,3 @@
-const { setTimeout } = require("node:timers/promises");
 const { writeFile, unlink } = require("node:fs/promises");
 const path = require('node:path');
 const cds = require("@sap/cds");
@@ -51,7 +50,6 @@ async function preparePdf(tempDocLocation, stream) {
   // Save the PDF document to a new file
   const pdfData = await pdfDoc.save();
   await writeFile(tempDocLocation, pdfData);
-  await setTimeout(200);
 }
 
 async function embeddingDocument(data, entities) {
@@ -108,7 +106,7 @@ async function embeddingDocument(data, entities) {
     }
   } catch (err) {
     throw new Error(
-      "Error while generating and storing vector embeddings: " + err?.message,
+      `Error while generating and storing vector embeddings: ${err?.message}`,
       {
         reason: err,
       }
@@ -150,7 +148,7 @@ module.exports = class EmbeddingService extends cds.ApplicationService {
       try {
         await Promise.all([cds.delete(Files), cds.delete(DocumentChunk)]);
       } catch (err) {
-        throw new Error("Error deleting the embeddings from db: " + err?.message, {
+        throw new Error(`Error deleting the embeddings from db: ${err?.message}`, {
           reason: err,
         });
       }

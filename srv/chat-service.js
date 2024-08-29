@@ -81,7 +81,7 @@ module.exports = class Chat extends cds.ApplicationService {
         );
         return response;
       } catch (err) {
-        throw new Error("Error generating response for user query.", {
+        throw new Error(`Error generating response for user query: ${err?.message}`, {
           reason: err,
         });
       }
