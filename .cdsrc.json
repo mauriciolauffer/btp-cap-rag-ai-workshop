@@ -12,12 +12,12 @@
     "workzone": true,
     "GENERATIVE_AI_HUB": {
       "CHAT_MODEL_DESTINATION_NAME": "AICoreAzureOpenAIDestination",
-      "CHAT_MODEL_DEPLOYMENT_URL": "/inference/deployments/___PLACEHOLDER___",
+      "CHAT_MODEL_DEPLOYMENT_URL": "/inference/deployments/___PLACEHOLDER_CHAT___",
       "CHAT_MODEL_RESOURCE_GROUP": "default",
       "CHAT_MODEL_NAME": "gpt-4o",
       "CHAT_MODEL_API_VERSION": "2023-05-15",
       "EMBEDDING_MODEL_DESTINATION_NAME": "AICoreAzureOpenAIDestination",
-      "EMBEDDING_MODEL_DEPLOYMENT_URL": "/inference/deployments/___PLACEHOLDER___",
+      "EMBEDDING_MODEL_DEPLOYMENT_URL": "/inference/deployments/___PLACEHOLDER_EMBED___",
       "EMBEDDING_MODEL_RESOURCE_GROUP": "default",
       "EMBEDDING_MODEL_NAME": "text-embedding-ada-002",
       "EMBEDDING_MODEL_API_VERSION": "2023-05-15"
