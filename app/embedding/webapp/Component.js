@@ -1,6 +1,6 @@
-sap.ui.define(["sap/ui/core/UIComponent"], function (UIComponent) {
-  "use strict";
+"use strict";
 
+sap.ui.define(["sap/ui/core/UIComponent"], function (UIComponent) {
   return UIComponent.extend("embedding.Component", {
     metadata: {
       manifest: "json",

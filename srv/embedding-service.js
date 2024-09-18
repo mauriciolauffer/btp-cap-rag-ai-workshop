@@ -1,3 +1,5 @@
+"use strict";
+
 const { writeFile, unlink } = require("node:fs/promises");
 const path = require('node:path');
 const cds = require("@sap/cds");
@@ -52,6 +54,41 @@ async function preparePdf(tempDocLocation, stream) {
   await writeFile(tempDocLocation, pdfData);
 }
 
+async function splitDocumentInTextChunks(docLocation) {
+  // Load the document to langchain text loader
+  const loader = new PDFLoader(docLocation);
+  const document = await loader.load();
+
+  // Split the document into chunks
+  const splitter = new RecursiveCharacterTextSplitter({
+    chunkSize: 1000,
+    chunkOverlap: 100,
+    addStartIndex: true,
+  });
+  return splitter.splitDocuments(document);
+}
+
+async function getEmbeddingPayload(textChunks, filename) {
+  const aiEmbeddingConfig = getAiEmbeddingConfig();
+    const textChunkEntries = [];
+    const vectorplugin = await cds.connect.to("cap-llm-plugin");
+
+    // For each text chunk generate the embeddings
+    for (const chunk of textChunks) {
+      const embedding = await vectorplugin.getEmbedding(
+        aiEmbeddingConfig,
+        chunk.pageContent
+      );
+      const entry = {
+        text_chunk: chunk.pageContent,
+        metadata_column: filename,
+        embedding: array2VectorBuffer(embedding?.data[0]?.embedding),
+      };
+      textChunkEntries.push(entry);
+    }
+    return textChunkEntries;
+}
+
 async function embeddingDocument(data, entities) {
   const { Files, DocumentChunk } = entities;
   const result = await cds
@@ -65,36 +102,8 @@ async function embeddingDocument(data, entities) {
   const tempDocLocation = path.join(__dirname, localFileNameNoGaps);
   try {
     await preparePdf(tempDocLocation, data.content);
-
-    // Load the document to langchain text loader
-    const loader = new PDFLoader(tempDocLocation);
-    const document = await loader.load();
-
-    // Split the document into chunks
-    const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 500,
-      chunkOverlap: 100,
-      addStartIndex: true,
-    });
-
-    const textChunks = await splitter.splitDocuments(document);
-    const aiEmbeddingConfig = getAiEmbeddingConfig();
-    const textChunkEntries = [];
-    const vectorplugin = await cds.connect.to("cap-llm-plugin");
-
-    // For each text chunk generate the embeddings
-    for (const chunk of textChunks) {
-      const embedding = await vectorplugin.getEmbedding(
-        aiEmbeddingConfig,
-        chunk.pageContent
-      );
-      const entry = {
-        text_chunk: chunk.pageContent,
-        metadata_column: result[0].fileName,
-        embedding: array2VectorBuffer(embedding?.data[0]?.embedding),
-      };
-      textChunkEntries.push(entry);
-    }
+    const textChunks = await splitDocumentInTextChunks(tempDocLocation);
+    const textChunkEntries = getEmbeddingPayload(textChunks, result[0].fileName);
 
     // Insert the text chunk with embeddings into db
     const status = await INSERT.into(DocumentChunk).entries(textChunkEntries);
@@ -105,7 +114,7 @@ async function embeddingDocument(data, entities) {
     throw new Error(
       `Error while generating and storing vector embeddings: ${err?.message}`,
       {
-        reason: err,
+        cause: err,
       }
     );
   } finally {
@@ -146,7 +155,7 @@ module.exports = class EmbeddingService extends cds.ApplicationService {
         await Promise.all([cds.delete(Files), cds.delete(DocumentChunk)]);
       } catch (err) {
         throw new Error(`Error deleting the embeddings from db: ${err?.message}`, {
-          reason: err,
+          cause: err,
         });
       }
     });

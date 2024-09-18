@@ -15,7 +15,7 @@
     "start": "ui5 serve"
   },
   "devDependencies": {
-    "ui5-task-zipper": "^3.1.7"
+    "ui5-task-zipper": "^3.3.0"
   },
   "peerDependencies": {
     "@ui5/cli": ">=4",

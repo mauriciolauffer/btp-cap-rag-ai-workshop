@@ -11,4 +11,4 @@ service EmbeddingService {
   action deleteEmbeddings() returns String;
 }
 
-annotate EmbeddingService with @(requires: 'authenticated-user');
+// annotate EmbeddingService with @(requires: 'authenticated-user');
