@@ -3,8 +3,13 @@
 const cds = require("@sap/cds");
 const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
 const {
-  WebPDFLoader,
-} = require("@langchain/community/document_loaders/web/pdf");
+  JSONLoader
+} = require("langchain/document_loaders/fs/json");
+const {
+UnstructuredLoader  
+} = require("@langchain/community/document_loaders/fs/unstructured");
+
+console.dir(JSONLoader)
 
 /**
  * Get the configuration to the embedding model
@@ -35,14 +40,15 @@ async function getPdfBlob(stream) {
     stream.on("error", reject);
   });
   const pdfBuffer = Buffer.concat(pdfBytes);
-  return new Blob([pdfBuffer], { type: "application/pdf" });
+  // return new Blob([pdfBuffer], { type: "application/pdf" });
+  return new Blob([pdfBuffer], { type: "application/json" });
 }
 
 /**
  * Split the document in multiple text chunks to be used in the embedding
  */
-async function splitDocumentInTextChunks(pdfBlob) {
-  const loader = new WebPDFLoader(pdfBlob, {});
+async function splitDocumentInTextChunks(jsonBlob) {
+  const loader = new JSONLoader(jsonBlob);
   const document = await loader.load();
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 1000,
@@ -90,8 +96,10 @@ async function embeddingDocument(data, entities) {
   }
   try {
     const pdfBlob = await getPdfBlob(data.content);
-    const textChunks = await splitDocumentInTextChunks(pdfBlob);
-    const textChunkEntries = await getEmbeddingPayload(
+    const textChunks = await splitDocumentInTextChunks(__dirname + '\\products-s4.json');
+    console.log(11111)
+    
+    /* const textChunkEntries = await getEmbeddingPayload(
       textChunks,
       result[0].fileName
     );
@@ -100,7 +108,7 @@ async function embeddingDocument(data, entities) {
     const status = await INSERT.into(DocumentChunk).entries(textChunkEntries);
     if (!status) {
       throw new Error("Insertion of text chunks into db failed!");
-    }
+    } */
   } catch (err) {
     throw new Error(
       `Error while generating and storing vector embeddings: ${err?.message}`,

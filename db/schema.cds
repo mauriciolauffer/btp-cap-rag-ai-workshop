@@ -21,7 +21,7 @@ entity Message : cuid, managed {
 entity DocumentChunk : cuid {
     text_chunk      : LargeString;
     metadata_column : LargeString;
-    embedding       : Vector(1536);
+    // embedding       : Vector(1536);
 }
 
 entity Files : cuid, managed {
