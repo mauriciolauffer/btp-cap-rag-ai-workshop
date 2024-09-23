@@ -1,13 +1,47 @@
-const cds = require("@sap/cds");
+"use strict";
 
-const tableName = "btpcapragai_DOCUMENTCHUNK";
-const embeddingColumnName = "EMBEDDING";
-const contentColumn = "TEXT_CHUNK";
+const cds = require("@sap/cds");
 const chatHistoryInMemory = [];
-const genericRequestPrompt = `You are a chatbot.
+
+/**
+ * Get chat history session
+ */
+function getChatHistorySession(sessionId) {
+  if (!chatHistoryInMemory[sessionId]) {
+    chatHistoryInMemory[sessionId] = [];
+  }
+  return chatHistoryInMemory[sessionId];
+}
+
+/**
+ * Get RAG response
+ */
+async function getRagResponse(userQuery, chatHistory) {
+  const chatInstuctionPrompt = `You are a chatbot.
   Answer the user question based only on the context, delimited by triple backticks.
   If you don't know the answer, just say that you don't know.`;
+  const tableName = "btpcapragai_DOCUMENTCHUNK";
+  const embeddingColumnName = "EMBEDDING";
+  const contentColumn = "TEXT_CHUNK";
+  const aiEmbeddingConfig = getAiEmbeddingConfig();
+  const aiChatConfig = getAiChatConfig();
+  const vectorplugin = await cds.connect.to("cap-llm-plugin");
+  return vectorplugin.getRagResponse(
+    userQuery,
+    tableName,
+    embeddingColumnName,
+    contentColumn,
+    chatInstuctionPrompt,
+    aiEmbeddingConfig,
+    aiChatConfig,
+    chatHistory,
+    10
+  );
+}
 
+/**
+ * Get the configuration to the embedding model
+ */
 function getAiEmbeddingConfig() {
   const genAiHub = cds.env.requires["GENERATIVE_AI_HUB"];
   return {
@@ -19,6 +53,9 @@ function getAiEmbeddingConfig() {
   };
 }
 
+/**
+ * Get the configuration to the chat model
+ */
 function getAiChatConfig() {
   const genAiHub = cds.env.requires["GENERATIVE_AI_HUB"];
   return {
@@ -30,13 +67,27 @@ function getAiChatConfig() {
   };
 }
 
+/**
+ * Prepare response from the AI
+ */
+function prepareResponse(ragResponse) {
+  return {
+    role: ragResponse.completion.choices[0].message.role,
+    content: ragResponse.completion.choices[0].message.content,
+    timestamp: new Date().toJSON(),
+    additionalContents: ragResponse.additionalContents,
+  };
+}
+
+/**
+ * Add messages to the chat history session
+ */
 function addMessagesToChatHistory(sessionId, userContent, assistantContent) {
-  const chatHistory = chatHistoryInMemory[sessionId];
-  chatHistory.push({
+  chatHistoryInMemory[sessionId].push({
     role: "user",
     content: userContent,
   });
-  chatHistory.push({
+  chatHistoryInMemory[sessionId].push({
     role: "assistant",
     content: assistantContent,
   });
@@ -45,35 +96,11 @@ function addMessagesToChatHistory(sessionId, userContent, assistantContent) {
 module.exports = class Chat extends cds.ApplicationService {
   init() {
     this.on("getAiResponse", async (req) => {
-      if (!chatHistoryInMemory[req.data.sessionId]) {
-        chatHistoryInMemory[req.data.sessionId] = [];
-      }
       try {
         const userQuery = req.data?.content;
-        const vectorplugin = await cds.connect.to("cap-llm-plugin");
-        const chatHistory = chatHistoryInMemory[req.data.sessionId];
-        const chatInstruction = genericRequestPrompt;
-        const aiEmbeddingConfig = getAiEmbeddingConfig();
-        const aiChatConfig = getAiChatConfig();
-        const ragResponse = await vectorplugin.getRagResponse(
-          userQuery,
-          tableName,
-          embeddingColumnName,
-          contentColumn,
-          chatInstruction,
-          aiEmbeddingConfig,
-          aiChatConfig,
-          chatHistory,
-          10
-        );
-
-        const response = {
-          role: ragResponse.completion.choices[0].message.role,
-          content: ragResponse.completion.choices[0].message.content,
-          timestamp: new Date().toJSON(),
-          additionalContents: ragResponse.additionalContents,
-        };
-
+        const chatHistory = getChatHistorySession(req.data.sessionId);
+        const ragResponse = await getRagResponse(userQuery, chatHistory);
+        const response = prepareResponse(ragResponse);
         addMessagesToChatHistory(
           req.data.sessionId,
           userQuery,
@@ -81,9 +108,12 @@ module.exports = class Chat extends cds.ApplicationService {
         );
         return response;
       } catch (err) {
-        throw new Error(`Error generating response for user query: ${err?.message}`, {
-          reason: err,
-        });
+        throw new Error(
+          `Error generating response for user query: ${err?.message}`,
+          {
+            cause: err,
+          }
+        );
       }
     });
 

@@ -1,8 +1,8 @@
+"use strict";
+
 sap.ui.define(
   ["sap/base/Log", "sap/ui/core/mvc/Controller"],
   function (Log, BaseController) {
-    "use strict";
-
     const logger = Log.getLogger("ai-workshop-embed");
 
     return BaseController.extend("embedding.controller.App", {

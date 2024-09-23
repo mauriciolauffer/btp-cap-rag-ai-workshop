@@ -6,23 +6,24 @@
   "license": "UNLICENSED",
   "private": true,
   "dependencies": {
-    "@langchain/community": "^0.2.28",
-    "@sap-cloud-sdk/http-client": "^3.18.1",
-    "@sap/cds": "^8.1.1",
+    "@langchain/community": "^0.3.1",
+    "@langchain/textsplitters": "^0.1.0",
+    "@sap-cloud-sdk/http-client": "^3.21.0",
+    "@sap/cds": "^8.2.3",
     "@sap/cds-hana": "^2.0.0",
-    "@sap/xsenv": "^5.2.0",
-    "@sap/xssec": "^4.2.1",
+    "@sap/xsenv": "^5.3.0",
+    "@sap/xssec": "^4.2.4",
     "cap-llm-plugin": "github:mauriciolauffer/cap-llm-plugin",
-    "express": "^4.19.2",
-    "langchain": "^0.2.16",
+    "express": "^4.21.0",
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^1.1.1"
   },
   "devDependencies": {
     "@cap-js/cds-types": "^0.6.5",
     "@cap-js/sqlite": "^1.7.3",
-    "@sap/ux-specification": "^1.120.17",
-    "eslint": "^9.9.0",
+    "@sap/ux-specification": "^1.124.1",
+    "eslint": "^9.11.0",
+    "eslint-config-mlauffer-ui5": "^1.0.3",
     "prettier": "^3.3.3"
   },
   "peerDependencies": {
@@ -31,12 +32,10 @@
   "scripts": {
     "start": "cds-serve",
     "hybrid": "cds watch --profile hybrid",
-    "watch-documents": "cds watch --open documents/webapp/index.html?sap-ui-xx-viewCache=false",
+    "lint": "eslint",
     "build": "mbt build -t gen --mtar archive",
     "deploy": "cf deploy gen/archive.mtar --retries 1 --delete-services",
-    "watch-embedding": "cds watch --open embedding/webapp/index.html?sap-ui-xx-viewCache=false",
-    "watch-chatting": "cds watch --open chatting/webapp/index.html?sap-ui-xx-viewCache=false",
-    "watch-chat": "cds watch --open chat/webapp/index.html?sap-ui-xx-viewCache=false"
+    "undeploy": "cf undeploy btp-cap-rag-ai --delete-services --delete-service-keys --delete-service-brokers"
   },
   "sapux": [
     "app/embedding",
