@@ -1,11 +1,10 @@
 "use strict";
 
-const { writeFile, unlink } = require("node:fs/promises");
-const path = require("node:path");
 const cds = require("@sap/cds");
-const { PDFDocument } = require("pdf-lib");
 const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
-const { PDFLoader } = require("@langchain/community/document_loaders/fs/pdf");
+const {
+  WebPDFLoader,
+} = require("@langchain/community/document_loaders/web/pdf");
 
 /**
  * Get the configuration to the embedding model
@@ -22,46 +21,28 @@ function getAiEmbeddingConfig() {
 }
 
 /**
- * Create PDF in local file system with content from the table
+ * Create PDF blob with content from the table
  */
-async function preparePdf(tempDocLocation, stream) {
-  const pdfDoc = await PDFDocument.create();
+async function getPdfBlob(stream) {
   const pdfBytes = [];
-
   // Collect streaming PDF content
   stream.on("data", (chunk) => {
     pdfBytes.push(chunk);
   });
-
   // Wait for the file content stream to finish
   await new Promise((resolve, reject) => {
     stream.on("end", resolve);
     stream.on("error", reject);
   });
-
-  // Load PDF buffer into a document
   const pdfBuffer = Buffer.concat(pdfBytes);
-  const externalPdfDoc = await PDFDocument.load(pdfBuffer);
-
-  // Copy pages from external PDF document to the new document
-  const pages = await pdfDoc.copyPages(
-    externalPdfDoc,
-    externalPdfDoc.getPageIndices()
-  );
-  pages.forEach((page) => {
-    pdfDoc.addPage(page);
-  });
-
-  // Save the PDF document to a new file
-  const pdfData = await pdfDoc.save();
-  await writeFile(tempDocLocation, pdfData);
+  return new Blob([pdfBuffer], { type: "application/pdf" });
 }
 
 /**
  * Split the document in multiple text chunks to be used in the embedding
  */
-async function splitDocumentInTextChunks(docLocation) {
-  const loader = new PDFLoader(docLocation);
+async function splitDocumentInTextChunks(pdfBlob) {
+  const loader = new WebPDFLoader(pdfBlob, {});
   const document = await loader.load();
   const splitter = new RecursiveCharacterTextSplitter({
     chunkSize: 1000,
@@ -107,11 +88,9 @@ async function embeddingDocument(data, entities) {
   if (result.length === 0) {
     throw new Error(`Document ${data.ID} not found!`);
   }
-  const localFileNameNoGaps = result[0].fileName.replace(/[^a-zA-Z0-9.]/g, "");
-  const tempDocLocation = path.join(__dirname, localFileNameNoGaps);
   try {
-    await preparePdf(tempDocLocation, data.content);
-    const textChunks = await splitDocumentInTextChunks(tempDocLocation);
+    const pdfBlob = await getPdfBlob(data.content);
+    const textChunks = await splitDocumentInTextChunks(pdfBlob);
     const textChunkEntries = await getEmbeddingPayload(
       textChunks,
       result[0].fileName
@@ -129,9 +108,6 @@ async function embeddingDocument(data, entities) {
         cause: err,
       }
     );
-  } finally {
-    // Delete temp document
-    await unlink(tempDocLocation);
   }
 }
 
