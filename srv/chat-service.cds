@@ -19,4 +19,4 @@ service ChatService {
     action deleteChatSession(sessionId : UUID)                                        returns String;
 }
 
-// annotate ChatService with @(requires: 'authenticated-user');
+annotate ChatService with @(requires: 'authenticated-user');

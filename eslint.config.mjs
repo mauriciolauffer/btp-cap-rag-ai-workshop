@@ -1,7 +1,7 @@
 import cds from "@sap/cds/eslint.config.mjs";
 import nodeConfig from "eslint-config-mlauffer-nodejs";
 import ui5Config from "eslint-config-mlauffer-ui5";
-console.dir(ui5Config)
+
 export default [
   {
     name: "local-ignores",

@@ -3,6 +3,9 @@
 const cds = require("@sap/cds");
 const chatHistoryInMemory = [];
 
+/**
+ * Get chat history session
+ */
 function getChatHistorySession(sessionId) {
   if (!chatHistoryInMemory[sessionId]) {
     chatHistoryInMemory[sessionId] = [];
@@ -10,6 +13,9 @@ function getChatHistorySession(sessionId) {
   return chatHistoryInMemory[sessionId];
 }
 
+/**
+ * Get RAG response
+ */
 async function getRagResponse(userQuery, chatHistory) {
   const chatInstuctionPrompt = `You are a chatbot.
   Answer the user question based only on the context, delimited by triple backticks.
@@ -33,6 +39,9 @@ async function getRagResponse(userQuery, chatHistory) {
   );
 }
 
+/**
+ * Get the configuration to the embedding model
+ */
 function getAiEmbeddingConfig() {
   const genAiHub = cds.env.requires["GENERATIVE_AI_HUB"];
   return {
@@ -44,6 +53,9 @@ function getAiEmbeddingConfig() {
   };
 }
 
+/**
+ * Get the configuration to the chat model
+ */
 function getAiChatConfig() {
   const genAiHub = cds.env.requires["GENERATIVE_AI_HUB"];
   return {
@@ -55,6 +67,9 @@ function getAiChatConfig() {
   };
 }
 
+/**
+ * Prepare response from the AI
+ */
 function prepareResponse(ragResponse) {
   return {
     role: ragResponse.completion.choices[0].message.role,
@@ -64,8 +79,10 @@ function prepareResponse(ragResponse) {
   };
 }
 
+/**
+ * Add messages to the chat history session
+ */
 function addMessagesToChatHistory(sessionId, userContent, assistantContent) {
-  // const chatHistory = getChatHistorySession(sessionId);
   chatHistoryInMemory[sessionId].push({
     role: "user",
     content: userContent,
