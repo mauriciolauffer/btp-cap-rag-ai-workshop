@@ -4,6 +4,38 @@ const cds = require("@sap/cds");
 const chatHistoryInMemory = [];
 
 /**
+ * Handle getAiResponse action, it communicates to the chatbot
+ */
+async function onGetAiResponse(data) {
+  try {
+    const userQuery = data?.content;
+    const chatHistory = getChatHistorySession(data.sessionId);
+    const ragResponse = await getRagResponse(userQuery, chatHistory);
+    const response = prepareResponse(ragResponse);
+    addMessagesToChatHistory(data.sessionId, userQuery, response.content);
+    return response;
+  } catch (err) {
+    throw new Error(
+      `Error generating response for user query: ${err?.message}`,
+      {
+        cause: err,
+      },
+    );
+  }
+}
+
+/**
+ * Handle deleteChatSession action, it deletes the chat session
+ */
+async function onDeleteChatSession(params) {
+  const index = chatHistoryInMemory.indexOf(params.sessionId);
+  if (index !== -1) {
+    delete chatHistoryInMemory[index];
+    chatHistoryInMemory.splice(index, 1);
+  }
+}
+
+/**
  * Get chat history session
  */
 function getChatHistorySession(sessionId) {
@@ -20,9 +52,9 @@ async function getRagResponse(userQuery, chatHistory) {
   const chatInstuctionPrompt = `You are a chatbot.
   Answer the user question based only on the context, delimited by triple backticks.
   If you don't know the answer, just say that you don't know.`;
-  const tableName = "btpcapragai_DOCUMENTCHUNK";
+  const tableName = "btpcapragai_s4hana_DOCUMENTCHUNK";
   const embeddingColumnName = "EMBEDDING";
-  const contentColumn = "TEXT_CHUNK";
+  const contentColumn = "TEXTCHUNK";
   const aiEmbeddingConfig = getAiEmbeddingConfig();
   const aiChatConfig = getAiChatConfig();
   const vectorplugin = await cds.connect.to("cap-llm-plugin");
@@ -35,7 +67,7 @@ async function getRagResponse(userQuery, chatHistory) {
     aiEmbeddingConfig,
     aiChatConfig,
     chatHistory,
-    10
+    10,
   );
 }
 
@@ -93,38 +125,14 @@ function addMessagesToChatHistory(sessionId, userContent, assistantContent) {
   });
 }
 
-module.exports = class Chat extends cds.ApplicationService {
+module.exports = class ChatService extends cds.ApplicationService {
   init() {
     this.on("getAiResponse", async (req) => {
-      try {
-        const userQuery = req.data?.content;
-        const chatHistory = getChatHistorySession(req.data.sessionId);
-        const ragResponse = await getRagResponse(userQuery, chatHistory);
-        const response = prepareResponse(ragResponse);
-        addMessagesToChatHistory(
-          req.data.sessionId,
-          userQuery,
-          response.content
-        );
-        return response;
-      } catch (err) {
-        throw new Error(
-          `Error generating response for user query: ${err?.message}`,
-          {
-            cause: err,
-          }
-        );
-      }
+      return onGetAiResponse(req.data);
     });
-
     this.on("deleteChatSession", async (req) => {
-      const index = chatHistoryInMemory.indexOf(req.params.sessionId);
-      if (index !== -1) {
-        delete chatHistoryInMemory[index];
-        chatHistoryInMemory.splice(index, 1);
-      }
+      await onDeleteChatSession(req.params);
     });
-
     return super.init();
   }
 };

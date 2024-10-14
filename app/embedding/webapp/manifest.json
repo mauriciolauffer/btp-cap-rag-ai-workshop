@@ -1,13 +1,11 @@
 {
   "_version": "1.59.0",
   "sap.app": {
-    "id": "btpcapragai.embedding",
+    "id": "btpcapragai.s4hana.embedding",
     "type": "application",
     "i18n": {
       "bundleName": "embedding.i18n.i18n",
-      "supportedLocales": [
-        ""
-      ],
+      "supportedLocales": [""],
       "fallbackLocale": ""
     },
     "applicationVersion": {
@@ -73,9 +71,7 @@
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {
           "bundleName": "embedding.i18n.i18n",
-          "supportedLocales": [
-            ""
-          ],
+          "supportedLocales": [""],
           "fallbackLocale": "",
           "async": true
         }

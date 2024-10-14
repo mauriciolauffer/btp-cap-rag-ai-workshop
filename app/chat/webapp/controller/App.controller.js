@@ -12,7 +12,7 @@ sap.ui.define(
         const objectBinding = evt.getSource().getObjectBinding();
         objectBinding.setParameter(
           "sessionId",
-          uiModel.getProperty("/sessionId")
+          uiModel.getProperty("/sessionId"),
         );
         await objectBinding.execute();
         this.getView().getModel("chat").setProperty("/", []);
@@ -23,7 +23,7 @@ sap.ui.define(
       onSendMessage: async function (evt) {
         this.setAppBusy(true);
         const userMessage = this.addUserMessageToChat(
-          evt.getParameter("value")
+          evt.getParameter("value"),
         );
         const payload = {
           sessionId: this.getView().getModel("ui").getProperty("/sessionId"),
@@ -94,5 +94,5 @@ sap.ui.define(
         return systemMessage;
       },
     });
-  }
+  },
 );

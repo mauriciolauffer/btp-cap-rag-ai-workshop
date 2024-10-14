@@ -1,4 +1,4 @@
-using {btpcapragai as db} from '../db/schema';
+using {btpcapragai.s4hana as db} from '../db/schema';
 
 service EmbeddingService {
   entity DocumentChunk as
@@ -7,8 +7,8 @@ service EmbeddingService {
       embedding
     };
 
-  entity Files         as projection on db.Files;
-  action deleteEmbeddings() returns String;
+  action createEmbeddings();
+  action deleteEmbeddings();
 }
 
-// annotate EmbeddingService with @(requires: 'authenticated-user');
+annotate EmbeddingService with @(requires: 'authenticated-user');

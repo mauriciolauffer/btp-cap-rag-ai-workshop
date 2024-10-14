@@ -28,6 +28,13 @@
         "destination": "GENERATIVE_AI_HUB",
         "requestTimeout": "300000"
       }
+    },
+    "API_PRODUCT_SRV": {
+      "kind": "odata-v2",
+      "model": "srv/external/API_PRODUCT_SRV",
+      "credentials": {
+        "destination": "S4HANA_CLOUD"
+      }
     }
   }
 }

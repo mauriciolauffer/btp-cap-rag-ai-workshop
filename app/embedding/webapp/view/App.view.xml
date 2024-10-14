@@ -6,47 +6,13 @@
     <App id="app">
         <Page id="page" floatingFooter="true" title="{i18n>title}" busyIndicatorDelay="0">
             <headerContent>
+                <Button icon="sap-icon://upload-to-cloud" tooltip="{i18n>createEmbeddings}" press=".onCreateEmbeddings" binding="{/createEmbeddings(...)}" />
                 <Button icon="sap-icon://delete" tooltip="{i18n>delete}" press=".onDeleteEmbeddings" binding="{/deleteEmbeddings(...)}" />
             </headerContent>
             <content>
-                <upload:UploadSet
-                    id="uploadSet"
-                    instantUpload="false"
-                    maxFileNameLength="255"
-                    maxFileSize="200"
-                    fileTypes="pdf"
-                    mediaTypes="application/pdf"
-                    afterItemAdded=".onAfterItemAdded"
-                    uploadCompleted=".onUploadCompleted"
-                    mode="None"
-                    items="{
-                    path:'/Files',
-                    parameters: { $orderby: 'createdAt desc' },
-                    templateShareable: false
-                    }">
-                    <upload:UploadSetItem
-                        id="uploadSetItems"
-                        fileName="{fileName}"
-                        mediaType="{mediaType}"
-                        enabledEdit="false"
-                        visibleEdit="false"
-                        enabledRemove="false"
-                        visibleRemove="true"
-                        removePressed=".onRemoveItem">
-                        <ObjectAttribute
-                            title="Uploaded By"
-                            text="{createdBy}"
-                            active="false" />
-                        <ObjectAttribute
-                            title="Uploaded on"
-                            text="{createdAt}"
-                            active="false" />
-                        <ObjectAttribute
-                            title="File Size"
-                            text="{size}"
-                            active="false" />
-                    </upload:UploadSetItem>
-                </upload:UploadSet>
+                <List id="s4data" items="{/DocumentChunk}">
+                    <StandardListItem title="{productId}" description="{productType}"></StandardListItem>
+                </List>
             </content>
         </Page>
     </App>

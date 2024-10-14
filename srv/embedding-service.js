@@ -1,15 +1,6 @@
 "use strict";
 
 const cds = require("@sap/cds");
-const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
-const {
-  JSONLoader
-} = require("langchain/document_loaders/fs/json");
-const {
-UnstructuredLoader  
-} = require("@langchain/community/document_loaders/fs/unstructured");
-
-console.dir(JSONLoader)
 
 /**
  * Get the configuration to the embedding model
@@ -26,42 +17,9 @@ function getAiEmbeddingConfig() {
 }
 
 /**
- * Create PDF blob with content from the table
- */
-async function getPdfBlob(stream) {
-  const pdfBytes = [];
-  // Collect streaming PDF content
-  stream.on("data", (chunk) => {
-    pdfBytes.push(chunk);
-  });
-  // Wait for the file content stream to finish
-  await new Promise((resolve, reject) => {
-    stream.on("end", resolve);
-    stream.on("error", reject);
-  });
-  const pdfBuffer = Buffer.concat(pdfBytes);
-  // return new Blob([pdfBuffer], { type: "application/pdf" });
-  return new Blob([pdfBuffer], { type: "application/json" });
-}
-
-/**
- * Split the document in multiple text chunks to be used in the embedding
- */
-async function splitDocumentInTextChunks(jsonBlob) {
-  const loader = new JSONLoader(jsonBlob);
-  const document = await loader.load();
-  const splitter = new RecursiveCharacterTextSplitter({
-    chunkSize: 1000,
-    chunkOverlap: 100,
-    addStartIndex: true,
-  });
-  return splitter.splitDocuments(document);
-}
-
-/**
  * Convert text chunks to vector (embedding)
  */
-async function getEmbeddingPayload(textChunks, filename) {
+async function getEmbeddingPayload(textChunks) {
   const aiEmbeddingConfig = getAiEmbeddingConfig();
   const textChunkEntries = [];
   const vectorplugin = await cds.connect.to("cap-llm-plugin");
@@ -70,11 +28,12 @@ async function getEmbeddingPayload(textChunks, filename) {
   for (const chunk of textChunks) {
     const embedding = await vectorplugin.getEmbedding(
       aiEmbeddingConfig,
-      chunk.pageContent
+      JSON.stringify(chunk),
     );
     const entry = {
-      text_chunk: chunk.pageContent,
-      metadata_column: filename,
+      productId: chunk.Product,
+      productType: chunk.ProductType,
+      textChunk: JSON.stringify(chunk),
       embedding: array2VectorBuffer(embedding?.data[0]?.embedding),
     };
     textChunkEntries.push(entry);
@@ -83,39 +42,59 @@ async function getEmbeddingPayload(textChunks, filename) {
 }
 
 /**
- * Embedding document process
+ * Handle createEmbedding action, it creates the embeddings
  */
-async function embeddingDocument(data, entities) {
-  const { Files, DocumentChunk } = entities;
-  const result = await cds
-    .read(Files)
-    .columns(["fileName"])
-    .where({ ID: data.ID });
-  if (result.length === 0) {
-    throw new Error(`Document ${data.ID} not found!`);
-  }
+async function onCreateEmbeddings() {
   try {
-    const pdfBlob = await getPdfBlob(data.content);
-    const textChunks = await splitDocumentInTextChunks(__dirname + '\\products-s4.json');
-    console.log(11111)
-    
-    /* const textChunkEntries = await getEmbeddingPayload(
-      textChunks,
-      result[0].fileName
-    );
+    const { DocumentChunk } = cds.entities;
+    const productService = await cds.connect.to("ProductService");
+    const { A_Product } = productService.entities;
+    const products = await productService
+      .read(A_Product)
+      .columns((product) => {
+        product.Product,
+          product.ProductType,
+          product.to_Description((toDescription) => toDescription("*")),
+          product.to_ProductBasicText((toProductBasicText) =>
+            toProductBasicText("*"),
+          ),
+          product.to_ProductPurchaseText((toProductPurchaseText) =>
+            toProductPurchaseText("*"),
+          ),
+          product.to_SalesDelivery((salesDelivery) => {
+            salesDelivery.ProductSalesOrg,
+              salesDelivery.ProductDistributionChnl,
+              salesDelivery.to_SalesText((expand) => expand("*"));
+          });
+      })
+      .limit(10); // TODO: Limiting to 10 just to make the tests faster
+    const textChunkEntries = await getEmbeddingPayload(products);
 
+    // Delete all entries to simplify the demo. Do not do it in real scenarios unless you really need it.
+    await cds.delete(DocumentChunk);
     // Insert the text chunk with embeddings into db
-    const status = await INSERT.into(DocumentChunk).entries(textChunkEntries);
-    if (!status) {
-      throw new Error("Insertion of text chunks into db failed!");
-    } */
+    await cds.insert(textChunkEntries).into(DocumentChunk);
   } catch (err) {
     throw new Error(
       `Error while generating and storing vector embeddings: ${err?.message}`,
       {
         cause: err,
-      }
+      },
     );
+  }
+}
+
+/**
+ * Handle deleteEmbeddings action, it deletes all embeddings
+ */
+async function onDeleteEmbeddings() {
+  const { DocumentChunk } = cds.entities;
+  try {
+    await cds.delete(DocumentChunk);
+  } catch (err) {
+    throw new Error(`Error deleting the embeddings from db: ${err?.message}`, {
+      cause: err,
+    });
   }
 }
 
@@ -135,26 +114,13 @@ function array2VectorBuffer(data) {
 }
 
 module.exports = class EmbeddingService extends cds.ApplicationService {
-  init() {
-    const { Files, DocumentChunk } = this.entities;
-
-    this.on("UPDATE", Files, async (req) => {
-      await embeddingDocument(req.data, this.entities);
+  async init() {
+    this.on("createEmbeddings", async () => {
+      await onCreateEmbeddings();
     });
-
     this.on("deleteEmbeddings", async () => {
-      try {
-        await Promise.all([cds.delete(Files), cds.delete(DocumentChunk)]);
-      } catch (err) {
-        throw new Error(
-          `Error deleting the embeddings from db: ${err?.message}`,
-          {
-            cause: err,
-          }
-        );
-      }
+      await onDeleteEmbeddings();
     });
-
     return super.init();
   }
 };

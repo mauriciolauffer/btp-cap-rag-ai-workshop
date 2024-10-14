@@ -1,4 +1,4 @@
-using {btpcapragai as db} from '../db/schema';
+using {btpcapragai.s4hana as db} from '../db/schema';
 
 type RagResponse_AdditionalContents {
     score       : String;
@@ -16,7 +16,7 @@ service ChatService {
     entity Conversation as projection on db.Conversation;
     entity Message      as projection on db.Message;
     action getAiResponse(sessionId : String, content : String, timestamp : Timestamp) returns RagResponse;
-    action deleteChatSession(sessionId : UUID)                                        returns String;
+    action deleteChatSession(sessionId : UUID);
 }
 
 annotate ChatService with @(requires: 'authenticated-user');
