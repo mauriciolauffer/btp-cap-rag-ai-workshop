@@ -10,7 +10,7 @@
     {
       "source": "^/?odata/(.*)$",
       "target": "/odata/$1",
-      "destination": "btp-cap-rag-ai-app-srv",
+      "destination": "btp-cap-rag-ai-s4hana-app-srv",
       "authenticationType": "xsuaa",
       "csrfProtection": false
     },
