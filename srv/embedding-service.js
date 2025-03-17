@@ -1,10 +1,8 @@
-"use strict";
-
-const cds = require("@sap/cds");
-const { RecursiveCharacterTextSplitter } = require("@langchain/textsplitters");
-const {
+import cds from "@sap/cds";
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import {
   WebPDFLoader,
-} = require("@langchain/community/document_loaders/web/pdf");
+} from "@langchain/community/document_loaders/web/pdf";
 
 /**
  * Get the configuration to the embedding model
@@ -126,7 +124,7 @@ function array2VectorBuffer(data) {
   return buffer;
 }
 
-module.exports = class EmbeddingService extends cds.ApplicationService {
+export default class EmbeddingService extends cds.ApplicationService {
   init() {
     const { Files, DocumentChunk } = this.entities;
 

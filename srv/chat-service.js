@@ -1,6 +1,5 @@
-"use strict";
+import cds from "@sap/cds";
 
-const cds = require("@sap/cds");
 const chatHistoryInMemory = [];
 
 /**
@@ -93,7 +92,7 @@ function addMessagesToChatHistory(sessionId, userContent, assistantContent) {
   });
 }
 
-module.exports = class Chat extends cds.ApplicationService {
+export default class Chat extends cds.ApplicationService {
   init() {
     this.on("getAiResponse", async (req) => {
       try {

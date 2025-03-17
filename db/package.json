@@ -1,0 +1,10 @@
+{
+  "name": "deploy",
+  "dependencies": {
+    "@sap/hdi-deploy": "^5.4.1",
+    "hdb": "^0.19.12"
+  },
+  "scripts": {
+    "start": "node node_modules/@sap/hdi-deploy/deploy.js --use-hdb"
+  }
+}

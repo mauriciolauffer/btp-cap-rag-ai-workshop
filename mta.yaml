@@ -20,7 +20,9 @@ modules:
       readiness-health-check-type: http
       readiness-health-check-http-endpoint: /health
     build-parameters:
-      builder: npm
+      builder: custom
+      commands:
+        - npm root
       ignore:
         - .env
         - node_modules/
@@ -42,6 +44,14 @@ modules:
     parameters:
       buildpack: nodejs_buildpack
       memory: 256MB
+    build-parameters:
+      builder: custom
+      commands:
+        - npm root
+      ignore:
+        - .env
+        - node_modules/
+        - default-env.json
     requires:
       - name: btp-cap-rag-ai-db-001
     properties:
