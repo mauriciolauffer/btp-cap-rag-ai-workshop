@@ -5,28 +5,28 @@
   "repository": "<Add your repository here>",
   "license": "UNLICENSED",
   "private": true,
+  "type": "module",
   "dependencies": {
-    "@langchain/community": "^0.3.19",
+    "@langchain/community": "^0.3.35",
     "@langchain/textsplitters": "^0.1.0",
-    "@sap-cloud-sdk/http-client": "^3.24.0",
+    "@sap-cloud-sdk/http-client": "^3.26.3",
+    "@sap/cds": "^8.8.2",
     "@sap/cds-hana": "^2.0.0",
-    "@sap/xsenv": "^5.4.0",
-    "@sap/xssec": "^4.2.7",
+    "@sap/xsenv": "^5.5.0",
+    "@sap/xssec": "^4.4.0",
     "cap-llm-plugin": "^1.4.5",
     "express": "^4.21.2",
     "pdf-parse": "^1.1.1"
   },
   "devDependencies": {
-    "@cap-js/cds-types": "^0.8.0",
-    "@cap-js/sqlite": "^1.7.8",
-    "@sap/cds": "^8.6.0",
-    "@sap/ux-specification": "^1.124.7",
-    "eslint": "^9.17.0",
-    "eslint-config-mlauffer-ui5": "^2.0.1",
-    "prettier": "^3.4.2"
-  },
-  "peerDependencies": {
-    "@sap/cds-dk": "^8"
+    "@cap-js/cds-types": "^0.9.0",
+    "@cap-js/sqlite": "^1.9.0",
+    "@sap/cds-dk": "^8.8.1",
+    "@sap/ux-specification": "^1.124.11",
+    "eslint": "^9.22.0",
+    "eslint-config-mlauffer-ui5": "^2.1.0",
+    "mbt": "^1.2.34",
+    "prettier": "^3.5.3"
   },
   "scripts": {
     "start": "cds-serve",
@@ -34,7 +34,7 @@
     "lint": "eslint",
     "build": "mbt build -t gen --mtar archive",
     "deploy": "cf deploy gen/archive.mtar --retries 1 --delete-services",
-    "undeploy": "cf undeploy btp-cap-rag-ai --delete-services --delete-service-keys --delete-service-brokers"
+    "undeploy": "cf undeploy btp-cap-rag-ai-001 --delete-services --delete-service-keys --delete-service-brokers"
   },
   "sapux": [
     "app/embedding",
