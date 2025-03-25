@@ -1,8 +1,7 @@
 {
   "name": "btp-cap-rag-ai",
   "version": "1.0.0",
-  "description": "A simple CAP project.",
-  "repository": "<Add your repository here>",
+  "description": "SAP CAP + SAP BTP AI Core = RAG AI Workshop",
   "license": "UNLICENSED",
   "private": true,
   "type": "module",
@@ -32,6 +31,7 @@
     "start": "cds-serve",
     "hybrid": "cds watch --profile hybrid",
     "lint": "eslint --cache",
+    "lint": "eslint --cache",
     "build": "mbt build -t gen --mtar archive",
     "deploy": "cf deploy gen/archive.mtar --retries 1 --delete-services",
     "undeploy": "cf undeploy btp-cap-rag-ai-001 --delete-services --delete-service-keys --delete-service-brokers"
@@ -39,5 +39,12 @@
   "sapux": [
     "app/embedding",
     "app/chat"
-  ]
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mauriciolauffer/btp-cap-rag-ai-workshop.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mauriciolauffer/btp-cap-rag-ai-workshop/issues"
+  }
 }

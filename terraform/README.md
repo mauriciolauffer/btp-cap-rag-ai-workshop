@@ -1,7 +1,5 @@
 # Getting Started with Terraform
 
-This is an implementation of the `GenAI Mail Insights` reference app from the mission:
-
 [Providers](https://developer.hashicorp.com/terraform/language/providers)
 
 [Resources](https://developer.hashicorp.com/terraform/language/resources)
