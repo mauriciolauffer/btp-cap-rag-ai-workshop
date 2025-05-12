@@ -12,7 +12,7 @@ sap.ui.define(
         const objectBinding = evt.getSource().getObjectBinding();
         objectBinding.setParameter(
           "sessionId",
-          uiModel.getProperty("/sessionId")
+          uiModel.getProperty("/sessionId"),
         );
         await objectBinding.execute();
         this.getView().getModel("chat").setProperty("/", []);
@@ -23,20 +23,23 @@ sap.ui.define(
       onSendMessage: async function (evt) {
         this.setAppBusy(true);
         const userMessage = this.addUserMessageToChat(
-          evt.getParameter("value")
+          evt.getParameter("value"),
         );
         const payload = {
-          sessionId: this.getView().getModel("ui").getProperty("/sessionId"),
+          sessionId: evt.getSource().getModel("ui").getProperty("/sessionId"),
           content: userMessage.content,
           timestamp: userMessage.timestamp,
         };
 
         try {
-          const response = await this.askAiAssistent(payload);
+          const response = await this.askAiAssistent(
+            payload,
+            evt.getSource().getObjectBinding(),
+          );
           this.addSystemMessageToChat(response);
         } catch (err) {
           this.addSystemMessageToChat({
-            content: "Error connecting to AI...",
+            content: `Error connecting to AI... ${err}`,
             timestamp: new Date().toJSON(),
           });
           logger.error(err);
@@ -50,22 +53,12 @@ sap.ui.define(
         uiModel.setProperty("/busy", isBusy);
       },
 
-      askAiAssistent: async function (payload) {
-        const url =
-          this.getOwnerComponent().getManifestEntry("sap.app").dataSources
-            .mainService.uri + "getAiResponse";
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
-        });
-        if (response.ok) {
-          return response.json();
-        } else {
-          throw new Error("fetch error...");
-        }
+      askAiAssistent: async function (payload, actionContext) {
+        actionContext.setParameter("sessionId", payload.sessionId);
+        actionContext.setParameter("content", payload.content);
+        actionContext.setParameter("timestamp", payload.timestamp);
+        await actionContext.execute();
+        return actionContext.getBoundContext().getObject();
       },
 
       addUserMessageToChat: function (content) {
@@ -94,5 +87,5 @@ sap.ui.define(
         return systemMessage;
       },
     });
-  }
+  },
 );

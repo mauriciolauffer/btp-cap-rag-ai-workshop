@@ -38,6 +38,7 @@ resources/
 dist/
 .eslintcache
 db.*
+**/package-lock.json
 
 # Terraform
 .terraform

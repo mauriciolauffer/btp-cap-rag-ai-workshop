@@ -1,8 +1,6 @@
 import cds from "@sap/cds";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
-import {
-  WebPDFLoader,
-} from "@langchain/community/document_loaders/web/pdf";
+import { WebPDFLoader } from "@langchain/community/document_loaders/web/pdf";
 
 /**
  * Get the configuration to the embedding model
@@ -62,7 +60,7 @@ async function getEmbeddingPayload(textChunks, filename) {
   for (const chunk of textChunks) {
     const embedding = await llmPlugin.getEmbeddingWithConfig(
       aiEmbeddingConfig,
-      chunk.pageContent
+      chunk.pageContent,
     );
     const entry = {
       text_chunk: chunk.pageContent,
@@ -91,7 +89,7 @@ async function embeddingDocument(data, entities) {
     const textChunks = await splitDocumentInTextChunks(pdfBlob);
     const textChunkEntries = await getEmbeddingPayload(
       textChunks,
-      result[0].fileName
+      result[0].fileName,
     );
 
     // Insert the text chunk with embeddings into db
@@ -104,7 +102,7 @@ async function embeddingDocument(data, entities) {
       `Error while generating and storing vector embeddings: ${err?.message}`,
       {
         cause: err,
-      }
+      },
     );
   }
 }
@@ -140,11 +138,11 @@ export default class EmbeddingService extends cds.ApplicationService {
           `Error deleting the embeddings from db: ${err?.message}`,
           {
             cause: err,
-          }
+          },
         );
       }
     });
 
     return super.init();
   }
-};
+}

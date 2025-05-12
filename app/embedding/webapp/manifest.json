@@ -5,9 +5,7 @@
     "type": "application",
     "i18n": {
       "bundleName": "embedding.i18n.i18n",
-      "supportedLocales": [
-        ""
-      ],
+      "supportedLocales": [""],
       "fallbackLocale": ""
     },
     "applicationVersion": {
@@ -73,9 +71,7 @@
         "type": "sap.ui.model.resource.ResourceModel",
         "settings": {
           "bundleName": "embedding.i18n.i18n",
-          "supportedLocales": [
-            ""
-          ],
+          "supportedLocales": [""],
           "fallbackLocale": "",
           "async": true
         }
