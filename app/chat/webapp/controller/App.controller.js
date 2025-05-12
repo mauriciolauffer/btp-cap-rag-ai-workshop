@@ -57,9 +57,8 @@ sap.ui.define(
         actionContext.setParameter("sessionId", payload.sessionId);
         actionContext.setParameter("content", payload.content);
         actionContext.setParameter("timestamp", payload.timestamp);
-        return actionContext.execute().then(() => {
-          return actionContext.getBoundContext().getObject();
-        });
+        await actionContext.execute();
+        return actionContext.getBoundContext().getObject();
       },
 
       addUserMessageToChat: function (content) {
