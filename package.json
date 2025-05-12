@@ -30,7 +30,8 @@
   "scripts": {
     "start": "cds-serve",
     "hybrid": "cds watch --profile hybrid",
-    "lint": "eslint --cache",
+    "lint": "prettier . --check --cache && eslint --cache",
+    "pretty": "prettier . --write --cache",
     "build": "mbt build -t gen --mtar archive",
     "deploy": "cf deploy gen/archive.mtar --retries 1 --delete-services",
     "undeploy": "cf undeploy btp-cap-rag-ai-001 --delete-services --delete-service-keys --delete-service-brokers"
