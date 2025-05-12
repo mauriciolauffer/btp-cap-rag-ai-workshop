@@ -34,7 +34,7 @@ async function getRagResponse(userQuery, chatHistory) {
     aiEmbeddingConfig,
     aiChatConfig,
     chatHistory,
-    10
+    10,
   );
 }
 
@@ -103,7 +103,7 @@ export default class Chat extends cds.ApplicationService {
         addMessagesToChatHistory(
           req.data.sessionId,
           userQuery,
-          response.content
+          response.content,
         );
         return response;
       } catch (err) {
@@ -111,7 +111,7 @@ export default class Chat extends cds.ApplicationService {
           `Error generating response for user query: ${err?.message}`,
           {
             cause: err,
-          }
+          },
         );
       }
     });
@@ -126,4 +126,4 @@ export default class Chat extends cds.ApplicationService {
 
     return super.init();
   }
-};
+}

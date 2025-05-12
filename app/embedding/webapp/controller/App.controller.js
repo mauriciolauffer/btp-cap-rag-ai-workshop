@@ -8,7 +8,7 @@ sap.ui.define(
     return BaseController.extend("embedding.controller.App", {
       onDeleteEmbeddings: async function (evt) {
         await evt.getSource().getObjectBinding().execute();
-        this.byId("uploadSet").getModel().refresh()
+        this.byId("uploadSet").getModel().refresh();
       },
 
       onAfterItemAdded: async function (evt) {
@@ -54,9 +54,10 @@ sap.ui.define(
         oUploadSet.uploadItem(item);
       },
 
-      getODataModelUrl: function() {
-        return this.getOwnerComponent().getManifestEntry("sap.app").dataSources.mainService.uri;
-      }
+      getODataModelUrl: function () {
+        return this.getOwnerComponent().getManifestEntry("sap.app").dataSources
+          .mainService.uri;
+      },
     });
-  }
+  },
 );
