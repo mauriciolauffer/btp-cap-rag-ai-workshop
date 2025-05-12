@@ -21,8 +21,7 @@ modules:
       readiness-health-check-http-endpoint: /health
     build-parameters:
       builder: custom
-      commands:
-        - npm root
+      commands: []
       ignore:
         - .env
         - node_modules/
@@ -46,8 +45,7 @@ modules:
       memory: 256MB
     build-parameters:
       builder: custom
-      commands:
-        - npm root
+      commands: []
       ignore:
         - .env
         - node_modules/
