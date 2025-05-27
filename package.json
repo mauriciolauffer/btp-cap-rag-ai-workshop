@@ -25,11 +25,15 @@
     "eslint": "^9.26.0",
     "eslint-config-mlauffer-ui5": "^2.1.0",
     "mbt": "^1.2.34",
-    "prettier": "^3.5.3"
+    "prettier": "^3.5.3",
+    "chai": "^5.2.0",
+    "chai-http": "^5.1.2",
+    "sinon": "^20.0.0"
   },
   "scripts": {
     "start": "cds-serve",
     "hybrid": "cds watch --profile hybrid",
+    "test": "cds watch --profile test",
     "lint": "prettier . --check --cache && eslint --cache",
     "pretty": "prettier . --write --cache",
     "build": "mbt build -t gen --mtar archive",
