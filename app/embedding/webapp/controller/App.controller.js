@@ -1,8 +1,8 @@
 "use strict";
 
 sap.ui.define(
-  ["sap/base/Log", "sap/ui/core/mvc/Controller"],
-  function (Log, BaseController) {
+  ["sap/base/Log", "sap/ui/core/mvc/Controller", "sap/ui/core/Item"],
+  function (Log, BaseController, Item) {
     const logger = Log.getLogger("ai-workshop-embed");
 
     return BaseController.extend("embedding.controller.App", {
@@ -14,6 +14,7 @@ sap.ui.define(
       onAfterItemAdded: async function (evt) {
         const item = evt.getParameter("item");
         try {
+          item.getParent().setBusy(true);
           const response = await this.createEntity(item);
           this.uploadContent(item, response.ID);
         } catch (err) {
@@ -26,12 +27,14 @@ sap.ui.define(
         const oUploadSet = evt.getSource();
         oUploadSet.removeAllIncompleteItems();
         oUploadSet.getBinding("items").refresh();
+        oUploadSet.setBusy(false);
       },
 
       onRemoveItem: function (evt) {
         const oUploadSet = evt.getSource();
         oUploadSet.removeAllIncompleteItems();
         oUploadSet.getBinding("items").refresh();
+        oUploadSet.setBusy(false);
       },
 
       createEntity: async function (item) {
@@ -49,8 +52,13 @@ sap.ui.define(
       uploadContent: function (item, fileId) {
         const url = this.getODataModelUrl() + `Files(${fileId})/content`;
         item.setUploadUrl(url);
+        item.addHeaderField(
+          new Item({
+            key: "slug",
+            text: item.getFileName(),
+          }),
+        );
         const oUploadSet = this.byId("uploadSet");
-        oUploadSet.setHttpRequestMethod("PUT");
         oUploadSet.uploadItem(item);
       },
 
