@@ -19,10 +19,12 @@
                     afterItemAdded=".onAfterItemAdded"
                     uploadCompleted=".onUploadCompleted"
                     mode="None"
+                    httpRequestMethod="Put"
+                    busyIndicatorDelay="0"
                     items="{
-                    path:'/Files',
-                    parameters: { $orderby: 'createdAt desc' },
-                    templateShareable: false
+                        path:'/Files',
+                        parameters: { $orderby: 'createdAt desc' },
+                        templateShareable: false
                     }">
                     <upload:UploadSetItem
                         id="uploadSetItems"

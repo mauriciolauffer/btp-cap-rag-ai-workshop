@@ -76,20 +76,13 @@ async function getEmbeddingPayload(textChunks, filename) {
  * Embedding document process
  */
 async function embeddingDocument(data, entities) {
-  const { Files, DocumentChunk } = entities;
-  const result = await cds
-    .read(Files)
-    .columns(["fileName"])
-    .where({ ID: data.ID });
-  if (result.length === 0) {
-    throw new Error(`Document ${data.ID} not found!`);
-  }
+  const { DocumentChunk } = entities;
   try {
     const pdfBlob = await getPdfBlob(data.content);
     const textChunks = await splitDocumentInTextChunks(pdfBlob);
     const textChunkEntries = await getEmbeddingPayload(
       textChunks,
-      result[0].fileName,
+      data.content.headers.slug,
     );
 
     // Insert the text chunk with embeddings into db

@@ -59,7 +59,8 @@
         "sap.ui.generic.app": {},
         "sap.ui.table": {},
         "sap.ushell": {},
-        "sap.ui.fl": {}
+        "sap.ui.fl": {},
+        "sap.fe.navigation": {}
       }
     },
     "contentDensities": {
