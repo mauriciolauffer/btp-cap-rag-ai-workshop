@@ -13,10 +13,6 @@ type RagResponse {
 }
 
 service ChatService {
-    entity Conversation as projection on db.Conversation;
-    entity Message      as projection on db.Message;
-    action getAiResponse(sessionId : String, content : String, timestamp : Timestamp) returns RagResponse;
-    action deleteChatSession(sessionId : UUID)                                        returns String;
 }
 
 annotate ChatService with @(requires: 'authenticated-user');
